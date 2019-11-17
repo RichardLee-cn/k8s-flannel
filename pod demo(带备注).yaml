@@ -1,0 +1,85 @@
+#记得去空白行
+apiVersion:v1  #版本号
+kind:Pod   
+metadata:      #元数据
+  name: string  #pod名称
+  namespace: string  #pod所属命名空间，默认default
+  labels:            #自定义标签列表
+  - name: string 
+  annotations:       #自定义注解列表
+  - name: string
+ spec:               #pod中容器的详细定义
+   containers:       #pod中容器列表
+   - name: string    #容器名称
+     image: string   #容器包含镜像名称
+	 imagePullPolicy: [Always | Never | IfNotPresent ] #获取镜像策略，always每次都重新下载镜像，never仅使用本地镜像，IfNotPresent优先使用本地镜像
+	 command: [string]                                #容器的启动命令，默认使用镜像打包时使用的命令
+	 args: [string]                                  #容器启动命令参数
+	 workingDir: string                             #容器工作目录
+	 volumeMounts:                                 #挂载到容器内部的存储卷配置
+	 - name: string                               #共享存储卷名称
+	   mountPath: string                         #存储卷在容器内mount的绝对路径
+	   readOnly: boolen(布尔值）                #是否为只读模式，默认读写模式
+	 ports：                                   #容器需要暴露的端口号列表
+     - name: string                           #端口名称
+	   containerPort：int                    #容器需要监听的端口号
+	   hostPort: int                        #容器所在主机需要监听的端口号，默认与containerPort相同，设置hostport时，该主机将无法启动该容器的第二份副本
+	   protocol: string                    #端口协议，支持TCP和UDP,默认TCP
+	 
+     env:                                 #容器运行前需设置的环境变量列表
+     - name: string               
+       value: string                     #环境变量值
+     
+     resources:                        #资源限制和资源请求的值
+       limits:
+         cpu: string                  #CPU限制,单位:core数，用于docker run --cpu-shares 参数
+         memory: string              #内存限制,单位:MiB/GiB，用于docker run --memory 参数
+       requests:                    #容器启动初始可用数量
+         cpu: string
+         memory: string	
+		 
+     livenessProbe:                #pod内容器健康检查，探测无响应几次后，系统自动重启该容器 ,[ exec | httpGet | tcpSocket ]三选一
+       exec:
+	     command: [string]       #exec方式指定命令或脚本
+	   httpGet:                 
+	     path: string
+		 port: string
+		 host: string
+		 scheme: string
+		 httpHeaders:
+		 - name: string
+		   value: string
+	   tcpSocket:
+	     port: number
+	   initialDelaySeconds: 0     #容器启动完成后，首次探测的时间，秒
+       timeoutSeconds: 0          #探测等待响应的超时时间，默认1秒，超过该时间，则认为容器不健康，则重启
+       periodSeconds: 0           #对容器健康检查的定期探测时间，默认10秒探测一次
+       successThreshold: 0
+       failureThreshold: 0
+	   securityContext: 
+	     privileged: false
+		 
+	  restartPolicy: [ Always | Never | OnFailure ]  #pod重启策略.Always:pod一旦终止运行，kubelet将重启容器；Never：pod终止后，kubelet将退出码报给master，不会重启pod；OnFailure:pod正常终止后不会重启pod
+	  
+	  nodeSelector: object   #pod调度到包含这些label的node上，以key：value方式指定
+	  
+	  imagePullSecrets:   #pull镜像时使用的secret名称，以name:secretKey指定
+	  - name: string
+	  
+	  hostNetwork: false  #是否使用主机网络模式，默认为false，若使用主机网络，则不再使用docker0网桥，该pod将无法在该主机上启动第二份副本
+	  
+	  volumes:            #该pod上定义的共享存储卷列表
+	  - name: string
+	    emptyDir: {}      #hostPath类型存储卷，与pod同生命周期的一个临时目录
+		hostPath:         #挂载在pod所在宿主机上的目录
+		  path: string
+		secret:           #挂载集群预定义的secret对象到容器内部
+		  secretName: string
+		  items:
+		  - key: string
+		    path: string
+		configMap:        #挂载集群预定义的configMap对象到容器内部
+		  name: string
+		  items:
+		  - key: string
+		    path: string
